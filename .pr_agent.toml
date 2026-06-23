@@ -1,0 +1,86 @@
+[pr_reviewer]
+extra_instructions = """
+Review this pull request against the VNS development SOP and the project's own language, framework, and runtime context.
+
+General review approach:
+- First infer the project type from the changed files, repository structure, dependency files, framework conventions, and README.
+- Apply best practices for the specific language, framework, platform, and runtime used by the project. Do not assume a stack when the repository does not define one.
+- When APIs, framework behavior, security guidance, or language-specific best practices are uncertain, clearly state the uncertainty and recommend verification against the project's documentation or current official docs.
+- Focus on actionable findings that reduce production risk. Avoid generic advice unless it is directly relevant to the diff.
+- Identify possible regressions and explain the affected user flow, API contract, data flow, or deployment risk.
+
+Commit standards:
+- Check whether commits appear to represent one logical change each. Flag PRs that mix unrelated refactors, features, fixes, or formatting changes when avoidable.
+- Commit messages should be in English and consistent with the project history.
+- The first line should be 50 characters or fewer and written in imperative mood, for example: "Add product search by SKU", not "Added" or "Adding".
+- If a commit needs explanation, it should use a blank line followed by a longer description.
+
+Repository and workflow standards:
+- Branch naming should follow feat/<ticket-or-summary>, fix/<ticket-or-summary>, or hotfix/<ticket-or-summary>.
+- For npm-compatible projects, flag npm or Yarn usage, package-lock.json, npm-shrinkwrap.json, and yarn.lock. Prefer pnpm.
+- Check for credential leaks, token exposure, unsafe logging, committed local configuration, and insecure environment handling.
+- Check dependency and vulnerability risks introduced by the change.
+- Check privacy and CIPA-style risks: data collection, tracking, retention, consent, child-safety, filtering, or monitoring concerns. Do not claim legal certification.
+- Check whether external collaborator access is implied or required before VNS review and approval.
+
+Liquid and Shopify theme standards, when Liquid or Shopify theme files are present:
+- Heavy logic such as calculations, data transformations, API fetches, and complex business decisions should not live in Liquid. Prefer JavaScript or backend code.
+- Sections and blocks should be configurable from the theme editor when merchant-managed content is reasonable. Flag hardcoded merchant-facing text or content that clients will likely need to change.
+- Avoid duplicated snippets or repeated Liquid structures. Recommend a shared snippet when similar code appears in multiple places.
+- Comments should explain non-obvious reasoning only. Prefer self-explanatory code.
+- SKU is the required identifier for product lookups in code, including apps, integrations, scripts, and theme customizations that need specific product matching.
+- Do not use tags to identify products or variants in code.
+- Exceptions to SKU-based lookup must be documented in the project README or introducing ticket and approved by the technical lead.
+
+JavaScript standards, when JavaScript or TypeScript is present:
+- Prefer ES modules in new code. Flag jQuery in new code.
+- Naming should use camelCase for variables and functions, PascalCase for classes and components, and UPPER_SNAKE_CASE for constants.
+- Prefer async/await over new .then() chains in new code.
+- Async operations that can fail, such as fetch, parsing, storage, webhooks, and integrations, should have explicit error handling.
+- Flag eval, with, and native prototype extension.
+
+CSS standards, when CSS, SCSS, or styling changes are present:
+- Check that the project has a documented naming convention, such as BEM, utility classes, CSS modules, or another project-specific approach, and that the change follows it.
+- Flag !important unless it is a narrow override with a clear justification comment.
+- Prefer mobile-first media queries from mobile to desktop.
+- Prefer CSS variables for colors, typography, spacing, and design tokens. Flag hardcoded hex colors inside components unless justified by the project convention.
+
+Integrations and webhook standards:
+- Webhooks must be idempotent. Receiving the same webhook twice must not duplicate records, charges, fulfillments, shipments, or side effects.
+- Every received webhook must validate HMAC or equivalent provider signature. Invalid signatures must be rejected before processing.
+- Webhook processing should be asynchronous where practical, with a fast HTTP response. For Shopify, responses should complete within 5 seconds.
+- Webhook endpoints should have their own structured logging and monitoring for critical operations and failures.
+
+Image and media performance standards:
+- Images below the fold should use lazy loading.
+- Responsive images should use srcset, sizes, or platform-equivalent responsive image helpers. Do not serve oversized desktop images to mobile.
+- Prefer modern formats such as WebP or AVIF when supported, with appropriate fallbacks.
+
+Third-party script standards:
+- Flag new analytics, chat, review, popup, tracking, or marketing scripts unless the PR documents why they are needed and their performance/privacy impact.
+- Prefer defer or async for third-party scripts. Blocking scripts require justification.
+- Active third-party scripts should be listed in the project README.
+
+Accessibility standards:
+- Baseline for new UI work is WCAG 2.1 AA.
+- Check for a skip-to-content link or equivalent keyboard bypass mechanism where layout/header changes affect page structure.
+- Informative images need useful alt text. Decorative images should use alt="".
+- Text contrast should meet AA: 4.5:1 for normal text and 3:1 for large text. If design ownership is outside VNS, flag the issue for Tech Board review.
+- Critical flows must support keyboard navigation, including search, add to cart, cart, forms, and checkout-related flows when applicable.
+- Every form input needs an associated label or accessible name.
+- Focus must be visible. Flag outline: none without an accessible replacement.
+- Headings should be hierarchical, with one H1 per page and no skipped levels where the markup controls document structure.
+- For projects requiring ADA or EAA coverage, flag that a full accessibility audit is needed before launch if the PR affects customer-facing UI.
+
+Docker standards, when Dockerfiles or compose files are present:
+- Prefer multi-stage builds when they reduce final image size or isolate build tooling.
+- Prefer small, maintained base images and pinned runtime versions where practical.
+- Runtime containers should not run as root unless justified.
+- Secrets must not be copied into image layers or printed during builds.
+- Dependency and build caches should be cleaned or isolated intentionally.
+"""
+
+[pr_code_suggestions]
+extra_instructions = """
+Keep suggestions production-ready, minimal, and actionable. Prefer maintainable fixes over broad rewrites. When suggesting language-specific changes, align the recommendation with the detected project stack and broadly accepted best practices. If current documentation is needed, say what should be verified against the project's documentation or current official docs.
+"""
